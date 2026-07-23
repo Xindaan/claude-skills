@@ -1,0 +1,15 @@
+# Interne Steuerung — nie oeffentlich.
+# TASK/STATE bleiben bewusst untracked: sie sammeln Pfade, Vorbedingungen und
+# Fundstellen, die in einem oeffentlichen Repo nichts zu suchen haben.
+# (Projekt-Override zur Monorepo-Konvention, begruendet im public-mirror-Skill.)
+.private/
+TASK.md
+STATE.md
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
