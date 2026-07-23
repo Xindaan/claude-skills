@@ -3,10 +3,12 @@
 Agent-Skills für Claude Code / Claude.ai — Werkzeuge, die aus meiner täglichen
 Arbeit entstanden sind und ohne meinen Kontext funktionieren.
 
-> **English:** Agent skills for Claude Code. Currently one skill: `spec-diff`
-> produces a *bijective* comparison report between two versions of a technical
-> specification (PDF, DOCX, Markdown, HTML, XML/XSD) — every single change
-> documented, no summaries. Reports are written in German by default.
+> **English:** Agent skills for Claude Code. `spec-diff` produces a *bijective*
+> comparison report between two versions of a technical specification (PDF,
+> DOCX, Markdown, HTML, XML/XSD) — every single change documented, no
+> summaries. `handover-spec-pack` turns an exploratory artifact (a prototype
+> repo, a spreadsheet) into a reviewable handover package, labelling every
+> statement as observed, inferred, or open. Output is German by default.
 
 ## Quickstart
 
@@ -14,7 +16,7 @@ Arbeit entstanden sind und ohne meinen Kontext funktionieren.
 git clone https://github.com/Xindaan/claude-skills.git ~/src/claude-skills
 ```
 
-Skill verfügbar machen — entweder global:
+Einen Skill verfügbar machen — entweder global:
 
 ```bash
 ln -s ~/src/claude-skills/skills/spec-diff ~/.claude/skills/spec-diff
@@ -60,6 +62,38 @@ priorisiert. Das Fokus-Kapitel bewertet aus einem angegebenen Blickwinkel
 
 **Ausgabe:** DOCX über `python-docx`; Template und Layout-Helfer liegen in
 `skills/spec-diff/references/` und `skills/spec-diff/scripts/`.
+
+### `handover-spec-pack` — Prototyp → übergabefähiges Spezifikationspaket
+
+Nimmt ein exploratives Artefakt — ein Prototyp-Repo, eine gewachsene
+Excel-Datei, JSON/CSV/SQL — und erzeugt daraus ein Paket, das ein Fachbereich
+reviewen und eine Entwicklung umsetzen kann.
+
+**Der Kern ist eine Disziplin, keine Vorlage:** jede Aussage wird als
+
+- `[OBSERVED]` — direkt aus dem Artefakt ableitbar,
+- `[INFERRED]` — plausible Interpretation aus Struktur, Benennung, Flow,
+- `[OPEN]` — nicht sicher ableitbar, strittig oder womöglich fehlerhaft
+
+gekennzeichnet. Ein harter Jahresfilter in einer Tabelle kann gewollte
+Geschäftsregel, temporäre Annahme oder schlicht ein Bug sein — der Unterschied
+darf nicht stillschweigend verschwinden. `Intent-Reviewable` ist das Ziel,
+`Intent-Certain` ist meist nicht erreichbar.
+
+**Ausgabe:** `SPEC.md`, `USER_GUIDE.md`, `OWNER_GUIDE.md`, `REVIEW_PACK.md`,
+`ASSUMPTIONS.md`, `ACCEPTANCE_TESTS.md`, `TRACEABILITY.csv`,
+`COVERAGE_REPORT.json` — vier Rollen-Views auf ein gemeinsames Zwischenmodell,
+plus Nachweis darüber, was abgedeckt ist und was offen blieb
+(`DRAFT` / `REVIEWABLE` / `HANDOVER_READY`).
+
+**Modul „SDLC-Einstieg"** für den Fall, dass der Prototyp danach weggeworfen
+wird: Black-Box-Analyse (was, nicht wie), funktionale Anforderungen als `FA-{n}`
+mit Auslöser/Eingabe/Ausgabe/Seiteneffekten/Abnahmekriterien, implizierte
+Entscheidungen als vorgeschlagene ADRs (`DECISIONS.md`), Grobschätzung je
+Funktion (`EFFORT.md`) — und kein Prototyp-Code im Paket, damit ein fremdes
+Team ohne Zugriff auf ihn arbeiten kann.
+
+Tool-agnostisch: funktioniert in Claude Code, Cowork und claude.ai.
 
 ## Konfiguration
 
