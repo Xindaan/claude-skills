@@ -8,7 +8,10 @@ Arbeit entstanden sind und ohne meinen Kontext funktionieren.
 > DOCX, Markdown, HTML, XML/XSD) — every single change documented, no
 > summaries. `handover-spec-pack` turns an exploratory artifact (a prototype
 > repo, a spreadsheet) into a reviewable handover package, labelling every
-> statement as observed, inferred, or open. Output is German by default.
+> statement as observed, inferred, or open. `public-mirror` covers building and
+> maintaining a public counterpart of a private work repo — allowlist sync,
+> fail-closed pre-push gate, history strategy, and the leak classes that
+> scanners miss. Output is German by default.
 
 ## Quickstart
 
@@ -94,6 +97,43 @@ Funktion (`EFFORT.md`) — und kein Prototyp-Code im Paket, damit ein fremdes
 Team ohne Zugriff auf ihn arbeiten kann.
 
 Tool-agnostisch: funktioniert in Claude Code, Cowork und claude.ai.
+
+### `public-mirror` — öffentliche Ableger privater Arbeits-Repos
+
+Wie man aus einem privaten Repo einen öffentlichen Ableger baut, ohne dabei
+Dinge zu veröffentlichen, die nicht raus sollen. Der Skill ist die
+aufgeschriebene Fassung mehrerer Audits — samt der Fehler, die dabei gemacht
+wurden.
+
+**Die vier Punkte, an denen es tatsächlich schiefgeht:**
+
+1. **Blocklist statt Allowlist.** Wenn der Default-Arm „public" ist, geht jede
+   neu angelegte Datei ohne Zutun raus. Default muss *privat* sein.
+2. **Der Sync scrubbt den Baum, nicht die History.** Ein Wert aus dem aktuellen
+   Stand zu entfernen lässt ihn in allen Alt-Commits stehen.
+3. **Gates, die an exakte Literale gebunden sind.** Ein Muster auf die
+   vierstellige Nachkommaform lässt die zweistellige durch. Musterklassen
+   matchen, nicht Einzelwerte — und jedes Muster gegen die *echte* Fundzeile
+   testen, nicht gegen das Wunschformat.
+4. **Reale Werte in Test-Fixtures.** Kein Secret, kein Name, kein verbotener
+   Pfad — nur Zahlen, die aus der Produktivdatei abgeschrieben wurden. Kein
+   Scanner schlägt darauf an; der Check muss wertbasiert gegen die private
+   Quelle laufen.
+
+Dazu ein Entscheidungsbaum für die History-Strategie (Squash-Snapshot vs.
+organisch — und warum akkumulierende Snapshot-History die schlechteste
+Kombination ist), eine Checkliste für ein fail-closed Pre-Push-Gate, und in
+[`patterns.md`](skills/public-mirror/patterns.md) die Scan-Muster nach
+Leak-Klassen.
+
+**Scan-Hygiene**, weil die Fehlerquelle oft der Scan selbst ist: ein Scan über
+eine leere Objektliste meldet „sauber" und prüft nichts — deshalb muss jeder
+Scan seine Prüfmenge ausgeben. `git grep` kennt hier kein `\b` und scheitert
+*still*. Und jedes verankerte Muster braucht einen Positivtest, denn ein Muster,
+das nichts findet, sieht im Report aus wie ein sauberes Repo.
+
+Der Skill ist bewusst instanzfrei: welche Repo-Paare existieren und was bei
+ihnen offen ist, gehört in eine Datei **beim Repo**, nicht in den Skill.
 
 ## Konfiguration
 
