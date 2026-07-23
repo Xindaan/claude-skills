@@ -214,11 +214,16 @@ Fachbegriffe kannte.
   *still* fehl (kein Treffer statt Fehler). Wortgrenzen ueber Zeichenklassen
   emulieren: `(^|[^a-z])marker([^a-z]|$)`.
 - **Kurztoken ohne Grenzen produzieren Fehlalarme, und Fehlalarme sind der
-  Weg zum `--no-verify`.** Realfall 23.07.2026: ein Kuerzel traf in einem Markdown-Text
-  dreimal — jedes Mal als Silbe in einem deutschen Wort (*Absicht*,
-  *unbeabsichtigter*). Drei-Buchstaben-Kuerzel (`foo`, `bar`, `baz`, `qux`,
-  `quy`, `quz`) deshalb **immer** verankert fuehren, nie als blosse
-  Alternative in einer langen Muster-Kette.
+  Weg zum `--no-verify`.** Realfall 23.07.2026: ein Drei-Buchstaben-Kuerzel
+  traf in einem Markdown-Text dreimal — jedes Mal als Silbe in einem deutschen
+  Wort. Wie `tag` in *Beitrag* und *Montag*: das Kuerzel ist da, die Bedeutung
+  nicht. Drei-Buchstaben-Kuerzel deshalb **immer** verankert fuehren, nie als
+  blosse Alternative in einer langen Muster-Kette.
+
+  > Die eigene Kuerzelliste gehoert dabei in die Marker-Quelle, nicht in die
+  > Doku: eine Aufzaehlung der Kuerzel, auf die man prueft, benennt die Domaene
+  > genauso wie ein Klartextbegriff. Real eingetreten in genau dieser Datei —
+  > der Guard hat die Aufzaehlung gefunden, mit der er konfiguriert wird.
 - **Jedes verankerte Muster braucht einen Positivtest.** Ein Muster, das nichts
   findet, und ein Muster, das kaputt ist, sehen im Report identisch aus.
   Einzeiler genuegt:

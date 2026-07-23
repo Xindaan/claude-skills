@@ -170,7 +170,7 @@ Muster fuer den Inhalts-Scan: **`patterns.md`** im selben Ordner.
   Positionsgroessen-Pruefung — sie suchte `"shares": <bruch>` (JSON,
   Doppelquote) und uebersah `'shares': 24` (Python, Singlequote, ganzzahlig).
   Formatbasierte Pruefungen immer gegen die echte Zielschreibweise testen.
-  Erledigt 23.07.2026 in einem privaten Repo, als Muster nachnutzbar: Quote-
+  Als Muster nachnutzbar: Quote-
   Klasse `["']` statt fester Doppelquote, Feldklasse `(shares|stk|stueck)`, und
   der Wert-Check deckt jetzt **jedes** numerische Feld der Depotdatei ab statt
   der vier, die der letzte Leak zufaellig benutzte. Zwei Lehren daraus:
