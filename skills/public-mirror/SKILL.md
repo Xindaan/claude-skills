@@ -110,12 +110,40 @@ cd <public> && git push                   # Guard laeuft als pre-push
 - **`Source: <sha>` in die Commit-Message.** Ohne diesen Trailer ist der
   Drift nicht bestimmbar. Damit:
   `git -C <priv> rev-list --count <sha>..HEAD`
+  **Ein privates `commit --amend` am Quell-Commit verwaist den Trailer.** Der
+  `Source:`-SHA im Ableger zeigt danach auf einen Commit, den es nicht mehr gibt
+  — und der naechste Sync repariert das NICHT, weil der Inhalt unveraendert ist
+  ("nichts geaendert, kein Commit"). Die Drift-Rechnung bricht dann still. Vor
+  jeder Drift-Aussage den Trailer-SHA auf Existenz pruefen, sonst nachziehen:
+  `git -C <priv> cat-file -e "<trailer-sha>^{commit}" || echo "Trailer verwaist"`.
+  Realfall: ein Message-Fix per Amend, danach zeigte der Trailer ins Leere.
+  **Der Trailer misst Commit-Distanz, nicht Content-Drift.** Schreitet das
+  private Repo durch public-irrelevante Commits fort (privates `tools/`, private
+  Seiten), meldet `rev-list --count <sha>..HEAD` eine Drift, die inhaltlich
+  keine ist. Die verlaessliche Currency-Probe ist der **No-op-Sync selbst**:
+  laeuft er durch und meldet "nichts geaendert", ist der Ableger nachweislich
+  aktuell — billiger und ehrlicher als jede Trailer-Distanz. Den Trailer fuer
+  Nachvollziehbarkeit fuehren, die Aktualitaetsfrage mit dem Sync beantworten.
+- **Der Sync ist tree-gated — Message- und Identitaets-Aenderungen traegt er
+  nicht.** Er committet nur, wenn `git diff --cached` nicht leer ist. Alles, was
+  ausschliesslich in der Commit-*Message* oder in Author/Committer lebt — ein
+  nachgeruesteter `Source:`-Trailer, eine korrigierte Message, eine per
+  `git config` umgestellte Mail — wird von einem Re-Sync **nie** aufgegriffen,
+  solange der Tree gleich bleibt. Solche Aenderungen brauchen ein manuelles
+  `git commit --amend --reset-author` im Ableger plus force-push. Realfall: ein
+  nachgeruesteter Trailer, Sync meldete "nichts geaendert" und haette ihn nie
+  gelandet.
 - **Lokal != publiziert.** Vor jeder Aussage ueber "was ist oeffentlich":
   `git ls-remote <url> main` gegen `git rev-parse main`. Ein ungepushter
   Commit ist noch abwendbar, ein gepushter nicht.
 - **Kein `--no-verify`.** Der Schalter kippt ALLE Pruefungen, nicht die eine,
   die meldet — und wirkt am staerksten beim ersten Push. Ein unerklaerlicher
   Guard-Fehler ist ein Grund abzubrechen, nicht zu umgehen.
+- **Snapshot-Tests im Snapshot laufen lassen, nicht aus `tools/public/`.** Tests,
+  die Konfig-/Fixture-Pfade relativ zu `__file__` aufloesen, melden aus dem
+  Quellbaum Fehlschlaege, die wie echte Defekte aussehen — reine Diagnose-Falle.
+  Realfall 27.07.2026: 22 Pfad-Artefakt-Fehlschlaege, alle folgenlos. Erst
+  syncen, dann im Zielbaum testen.
 - **Erst die History-Strategie feststellen, dann syncen.** `git log --oneline`
   im Ableger UND `git ls-remote <url>`: genau 1 Commit auf beiden Seiten heisst
   Squash-Snapshot, und dann ist der Sync `git commit --amend --reset-author`
@@ -125,9 +153,57 @@ cd <public> && git push                   # Guard laeuft als pre-push
   Tatsache und kann veraltet sein (Realfall 23.07.2026: sie behauptete
   "organische History" fuer ein Squash-Repo) — im Zweifel gilt das Repo.
 
+## B2) Portieren statt Diffen — wenn der Ableger divergiert ist
+
+Ein Ableger, der laenger lebt, ist irgendwann **kein Spiegel mehr**: uebersetzte
+Bezeichner, eigene Weiterentwicklung, Features die public frueher ankamen als
+privat. Dann ist `git diff` zwischen den Repos wertlos und ein Diff-Apply
+gefaehrlich — die private Aenderung muss auf die public Struktur **abgebildet**
+werden. Reihenfolge, die sich bewaehrt hat:
+
+1. **Erst den public Ist-Stand feststellen, nicht den privaten Diff anwenden.**
+   Was hat der Ableger von der Aenderung schon? Wo ist er eigenstaendig
+   weitergegangen? Realfall: eine gemeinsame Hilfsschicht war public bereits da,
+   aber an einer Stelle anders implementiert — ein Diff-Apply haette einen Test
+   gebrochen, den es privat gar nicht gibt.
+2. **Aenderung als Spezifikation lesen, nicht als Patch** — welches Verhalten,
+   welche Felder, welche Einfuegestelle. Das Diff-Lesen laesst sich delegieren;
+   die leak-sensible Anwendung nicht.
+3. **Einfuegestelle im Ziel verifizieren, nicht raten** (Nachbarzeilen lesen),
+   dann Feature fuer Feature portieren, jeweils mit gespiegeltem Test in der
+   Zielsprache des Ablegers.
+4. **Vorbestehende Defekte im Ziel sind nicht Teil des Ports.** Faellt beim
+   Portieren ein Bug auf, der schon vorher da war: melden, nicht im Sync-Commit
+   mitfixen — sonst vermischt sich Port und Reparatur, und der Commit wird
+   unpruefbar.
+
+**Ein Task-Ticket spannt oft Portierbares UND Nicht-Portierbares.** Die
+Ausschlussliste ist datei-basiert und trifft deshalb die falsche Einheit: eine
+Aenderung kann eine generische Haelfte haben, die raus darf, und eine
+personenbezogene, die nicht darf (Realfall: derselbe Task lieferte einen
+generischen Steuer-Guard *und* Konto-Varianten-Strategien). Die Portier-Frage
+deshalb **pro Hunk stellen, nicht pro Ticket** — und im Sync-Bericht
+ausdruecklich benennen, welche Haelfte bewusst drinnen blieb.
+
 ## C) Pre-Push-Gate — Checkliste
 
 Fail-closed: fehlt die Marker-Quelle, wird **jeder** Push verweigert.
+
+**Die Installation darf nicht am Erinnern haengen.** `.git/hooks` wird weder
+versioniert noch mitgeklont — ein frischer Klon des Ablegers hat keinen Guard,
+und das faellt niemandem auf. Ein Satz in der Doku ("nach dem Clone neu
+installieren") ist dafuer keine Kontrolle, sondern eine Hoffnung. Richtig:
+**das Sync-Skript installiert den Guard bei jedem Lauf selbst** und verifiziert
+die Kopie per `shasum`; schlaegt das fehl, bricht der Sync ab. Der Sync ist der
+einzige Weg, auf dem ein Snapshot entsteht, also kann keiner ohne aktuellen
+Guard existieren.
+
+Dabei die **Reihenfolge** beachten: die Installation gehoert **vor** die
+Inhalts-Gates. Steht sie dahinter, bleibt ein frischer Klon ausgerechnet dann
+ungeschuetzt, wenn der Sync an einem Fund abbricht — also im Fehlerfall.
+Realfall 23.07.2026: genau so zuerst gebaut und im Test aufgefallen. Den
+Zeilenvergleich (Aufruf vor Gate) als Testfall festhalten; beim naechsten
+Umbau geht die Reihenfolge sonst leise verloren.
 
 ```bash
 PRIV=<privat>; PUB=<public>
@@ -156,6 +232,17 @@ git fsck --unreachable --dangling; git reflog --all  # Amend-Reste?
 
 Muster fuer den Inhalts-Scan: **`patterns.md`** im selben Ordner.
 
+**Das Push-Gate ist delta-basiert — Drift akkumuliert daran vorbei.** Es prueft
+den aktuellen Batch, nie den Bestand. Was ein frueherer Sync durchgelassen hat,
+faellt keinem spaeteren mehr auf: es steht im Baum, aber in keinem Delta.
+Realfall: drei deutsche Runtime-Strings aus alten Syncs in einem Ableger, der
+English-only sein soll — von jedem Push-Gate seither uebersehen, weil niemand
+sie mehr anfasste. Deshalb **zusaetzlich zum Push-Gate**
+in groesseren Abstaenden einen **Ganzbaum-Scan** fahren (alle Marker gegen
+`git ls-tree -r HEAD`, nicht gegen den Diff) und das Ergebnis mit Datum in der
+Instanzdatei festhalten. Der Ganzbaum-Scan findet die Klasse, fuer die das
+Push-Gate strukturell blind ist.
+
 ## Regeln aus dem Audit vom 21.07.2026
 
 - **Test-Fixtures nie aus der Produktivdatei speisen.** Der teuerste Fund des
@@ -179,11 +266,16 @@ Muster fuer den Inhalts-Scan: **`patterns.md`** im selben Ordner.
     ganzzahlige Stueckzahl — und genau eine solche war der Fund. Loesung: das
     PAAR suchen, nicht die Zahl. `'shares': 24` ist Depotdatum, ein loses 24
     nicht. Damit faellt die Wolf-Frage weg und die Klasse ist trotzdem zu.
-  - **Der Riegel gehoert eine Ebene frueher.** Der Guard blockt den Push, also
-    erst nachdem der Wert schon abgeschrieben ist. Ein Test im PRIVATEN Repo,
-    der Fixtures gegen die echte Depotdatei prueft, verbietet ihn vorher —
-    inklusive namentlicher Ausnahmeliste fuer Tests, die gegen einen Broker-
-    Beleg validieren und deshalb nie portiert werden duerfen.
+  - **Der Riegel gehoert eine Ebene frueher — und ist nicht optional.** Der
+    Guard blockt den Push, also erst nachdem der Wert schon abgeschrieben ist.
+    Jedes Paar braucht deshalb im PRIVATEN Repo (a) einen billigen pytest, der
+    die Testsuite gegen `tools/leak_markers.sh` grept, und (b) einen
+    wertbasierten Abgleich der Fixtures gegen die echte Datenquelle — inklusive
+    namentlicher Ausnahmeliste fuer Tests, die gegen einen Broker-Beleg
+    validieren und deshalb nie portiert werden duerfen. Zweiter Beleg: fehlt
+    dieser private Test, kommt dieselbe Fixture-Datei Tage spaeter mit denselben
+    echten IDs zurueck — der Push-Guard faengt die Wiederkehr nicht, er blockt
+    sie nur jedes Mal erneut.
 - **Overrides durch dasselbe Gate.** Eine echte Geraete-UUID stand in einem
   gescrubbten Public-README-Override. Weil der Override die *Quelle* ist,
   re-publiziert ihn jeder kuenftige Sync. Ein Fix im public Repo allein
@@ -206,6 +298,35 @@ Muster fuer den Inhalts-Scan: **`patterns.md`** im selben Ordner.
   scrubbt, muss die History mitdenken — sonst ist der Fund nur unsichtbar,
   nicht weg.
 
+## Weitere Regeln aus einem Sync eines hardware-nahen Ablegers
+
+- **Ein hartkodierter Echtwert ist selten nur ein Leak — das Gate ist zugleich
+  eine Code-Qualitaets-Sonde.** Ein realer Ortsname stand als Default-Wert in
+  einem Job-Modul; dahinter ein latenter Bug: das genutzte Attribut sitzt auf
+  einer anderen Konfig-Klasse als der, die abgefragt wurde, also liefert der
+  `getattr(obj, "feld", None)`-Zugriff **immer** `None` und der hartkodierte
+  Fallback greift immer (im Fund folgenlos, weil die betroffenen Objekte vorher
+  uebersprungen wurden — ein zweiter Fall bekaeme still den falschen Wert).
+  Hartkodierte Echtwerte markieren oft einen fehlenden Konfig-Zugriff. Den Leak
+  verhaltenserhaltend fixen; die dahinterliegende Verhaltensaenderung an einem
+  Live-System ist eine getrennte Owner-Entscheidung, nicht Teil des Syncs.
+- **Begruendungs-Kommentare sind eine eigene Leak-Klasse** (Muster:
+  `patterns.md` §5b). Docstrings, die *warum* erklaeren, zitieren den realen
+  Fall ("Objekt X (`<echte-id>`) fiel 77 -> 30"). Kein Secret- oder
+  Fixture-Muster trifft. Drei von fuenf Fundstellen dieses Syncs waren von
+  dieser Art.
+
+## Die andere Richtung: Vollstaendigkeit
+
+Der Skill gatet nur, was zu viel RAUS geht. Die zweite Fehlerklasse ist, dass
+oeffentliche Doku hinter dem privaten Stand zurueckbleibt — kein Leak, aber die
+public README wird schlicht falsch. Realfall 27.07.2026: eine Feature-Aenderung
+(zwei neue Config-Keys) landete in privatem TASK/STATE, aber weder in der public
+README noch in der Beispiel-Config; **kein Gate meldet das**. Beim Sync deshalb:
+neue Zonen-/Config-Keys gegen README **und** `*.example.*` diffen und bei
+Fehlbetrag warnen. Das ist die Klasse, die "gute public README" ueberhaupt zur
+Daueraufgabe macht.
+
 ## Wenn doch etwas publiziert wurde
 
 Reihenfolge, nicht verhandelbar: **1. rotieren, 2. dann erst rewriten.**
@@ -214,6 +335,55 @@ sind nicht einholbar. Rewrite (`filter-repo` + force-push) ist Kosmetik fuer
 den Objectstore, kein Ersatz fuer Rotation, und **immer Einzelfreigabe des
 Owners**. Vorher `gh repo view --json forkCount,stargazerCount` — bei 0 Forks
 ist ein Rewrite noch weitgehend wirksam.
+
+### Ein force-push loescht nichts — gemessen, nicht vermutet
+
+Der ueberschriebene Commit bleibt bei GitHub liegen und wird **per SHA weiter
+ausgeliefert**. Realfall 23.07.2026: nach `commit --amend --reset-author` +
+`push --force-with-lease` lieferte
+
+```bash
+gh api repos/<owner>/<repo>/commits/<alter-sha> --jq '.commit.author.email'
+```
+
+die alte Klarnamen-Mail unveraendert zurueck — Author *und* Committer. Erst
+nach Loeschen und Neuanlegen des Repos antwortet dieselbe Abfrage mit
+HTTP 422 `No commit found`.
+
+**Erst die Gabelung pruefen: benigner oder gefaehrlicher Waise?** Nicht jeder
+ueberschriebene Commit ist eine Leak-Sorge — ein Message-only-Amend (etwa das
+Nachruesten des `Source:`-Trailers) hinterlaesst einen Waisen, dessen Tree
+byte-identisch und dessen Identitaet schon sauber ist. Bevor jemand wegen eines
+abrufbaren alten SHA an Neuanlage denkt, die zwei Vergleiche laufen lassen:
+
+```bash
+git rev-parse "<alt>^{tree}" "<neu>^{tree}"          # gleicher Tree?
+git log -1 --format='%an %ae|%cn %ce' <alt>          # schon Noreply?
+```
+
+Gleicher Tree **und** saubere Identitaet = kein Handlungsbedarf, nur benennen.
+Erst wenn einer der beiden abweicht, gilt der Rest dieser Sektion. Ohne diese
+Gabelung loest jeder Trailer-Fix einen Fehlalarm aus — und Fehlalarme sind der
+Weg zur unnoetigen Repo-Neuanlage.
+
+Konsequenzen fuer die Praxis:
+
+- **Ein Amend/Rewrite bereinigt den sichtbaren Stand, nicht die Historie des
+  Servers.** Wer "X ist jetzt weg" behauptet, muss die Abfrage oben gelaufen
+  sein lassen. Das ist der einzige Beleg; `git log` im Klon zeigt sie nie.
+- **Muss etwas wirklich weg, ist die Neuanlage das einzige Mittel.** Preis sind
+  Stars, Forks, Issues und PR-History — bei einem frischen Showcase-Repo also
+  oft null. Vorher `description`, `topics`, `has_issues`/`has_projects` sichern
+  (`gh api repos/<o>/<r> --jq '{description,topics,has_issues,has_projects}'`);
+  LICENSE, CI-Workflows und Issue-Templates liegen im Tree und kommen mit dem
+  Push von selbst zurueck.
+- **Das Loeschen gehoert dem Owner**, nicht dem Agenten. Es braucht ausserdem
+  den `delete_repo`-Scope, den ein normaler `gh`-Token nicht hat
+  (`gh auth refresh -h github.com -s delete_repo`, oder Weboberflaeche →
+  Settings → Danger Zone). Den Scope hinterher wieder abraeumen.
+- **Reihenfolge:** loeschen → **privat** neu anlegen → pushen → verifizieren →
+  erst dann auf public schalten. Nie in ein bereits oeffentliches Repo hinein
+  sanieren, wenn die Neuanlage ohnehin ansteht.
 
 ## Instanzdaten — nicht hier, sondern am Repo
 
@@ -252,7 +422,12 @@ Gegenstand entfernt liegen. Eine Tabelle in `~/.claude/skills/` wird gepflegt,
 wenn jemand daran denkt; eine Datei im Repo wird gepflegt, wenn das Repo sich
 aendert. Realfall 23.07.2026: die fruehere Tabelle an dieser Stelle fuehrte
 einen Ableger als publiziert, der laengst auf privat stand, und meldete einen
-fehlenden Guard, den es gab — beides wurde geglaubt und war falsch.
+fehlenden Guard, den es gab — beides wurde geglaubt und war falsch. Und
+27.07.2026: die prominenteste Warnung derselben Instanzdatei behauptete vier
+Tage lang Blocklist-Default, obwohl das Skript laengst auf Allowlist
+(`*) return 0`) stand. Regel darum verallgemeinert: **jede** Behauptung der
+Instanzdatei am Objekt pruefen, mit dem Befehl daneben — nicht nur die
+History-Strategie, auch Guard-Zustand, Default-Arm und Sichtbarkeit.
 
 Fehlt dem Ableger der `Source:`-Trailer, ist sein Drift nur ueber Datum
 schaetzbar — beim naechsten Sync nachruesten.

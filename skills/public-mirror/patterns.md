@@ -181,6 +181,45 @@ Fachbegriffe kannte.
   Toleranzen des realen Produkts, Kennzahlenkuerzel der Abteilung, Namen
   benachbarter interner Skills.
 
+### 5b. Begruendungs-Kommentare / Docstrings  ⚠ marker-blind
+
+Gute Doku-Praxis erklaert *warum* eine Regel existiert — und zitiert dafuer den
+realen Fall: `# Zone <echte-id> fiel 77 -> 30, daher Pre-Soak`. Damit wandert
+ein echter Identifier oder Messwert in den **Produktivcode**, nicht in eine
+Fixture, wo man ihn suchen wuerde. Kein Secret-Muster trifft, weil es ein
+Kommentar ist; kein Fixture-Check trifft, weil es kein Testdatum ist.
+
+- Kommentare und Docstrings gleichgewichtig mit Code scannen, nicht als Rauschen
+  ueberspringen. Besonders `# ACHTUNG`, `# HACK`, Begruendungs- und
+  Changelog-Zeilen ("weil", "fiel", "Realfall", Datumsangaben).
+- Realfall: drei von fuenf Fundstellen eines Syncs waren Begruendungs-Kommentare
+  mit echten Geraete-IDs; die uebrigen zwei ein Fixture-Wert und ein
+  hartkodierter Default-Ortsname.
+- Deckungsgleich mit §5: den Marker auf den kuerzesten gebraeuchlichen
+  ID-Praefix setzen (8-Hex-Kurzform), sonst uebersieht er die Kurzform, in der
+  Kommentare IDs typischerweise nennen.
+
+### 5c. Legitime oeffentliche Fakten, die den Fingerabdruck schaerfen
+
+Die De-Personalisierung zielt auf Geheimes — Holdings, Konten, Koordinaten. Sie
+schweigt zu einer Zwischenklasse: **oeffentlich bekannte Drittfakten, die
+trotzdem die Identitaet verengen.** Die genutzten Broker samt Gebuehrentabelle,
+der Stromtarif, das Versicherungsprodukt, die Bank, das konkrete Geraetemodell —
+alles frei recherchierbar, keines ein Leak, in Summe aber ein Profil des Owners.
+
+- **Die Frage ist nicht "geheim?", sondern "muss es namentlich sein?"** Ein
+  Kostenmodell braucht die Zahlen, nicht zwingend die Marke. Wo der Name
+  fachlich traegt (Nachvollziehbarkeit einer Gebuehrenordnung), ist er ein
+  **bewusst akzeptierter Fingerabdruck** — dann gehoert er als solcher in die
+  Instanzdatei notiert, nicht stillschweigend gesetzt.
+- Realfall: zwei Broker als Factory-Funktionen und in der README, mit ihren
+  realen Tarifen. Als akzeptabel gewertet, weil die Tarife den Backtest
+  ueberhaupt erst pruefbar machen — aber es war eine Entscheidung, und
+  Entscheidungen werden dokumentiert, nicht angenommen.
+- Kandidaten: Broker/Bank/Versicherer, Tarif- und Produktnamen, Geraete- und
+  Herstellermodelle, genutzte Dienste mit Kontobezug, Wohnort-nahe
+  Infrastruktur (Netzbetreiber, Stadtwerke).
+
 ## 6. Struktur / Artefakte
 
 - Verbotene Pfade als **Praefix**: `STATE.md`, `TASK.md`, `PLAN.md`,
@@ -266,6 +305,14 @@ Fachbegriffe kannte.
   ```
   Testfall dafuer: den Hook mit einem garantiert nicht existierenden `roid`
   fuettern und pruefen, dass er eine Mengenangabe > 0 ausgibt.
+- **Die "genau 1 Commit"-Invariante nie mit `--all` pruefen.** Im Fenster
+  zwischen lokalem Amend und Force-Push zaehlt `git rev-list --all --count` im
+  Ableger **2** — lokaler `main` plus das noch alte `origin/main`. Das sieht aus,
+  als waere die Squash-Invariante gerissen, und verleitet zu einer Panik-Reaktion
+  auf einen reinen Messfehler. Richtig ist in diesem Fenster
+  `git rev-list --count main`; `--all` stimmt erst wieder nach dem Push.
+  Gleiche Klasse wie die Objektzahl-Regel oben: **erst pruefen, was die
+  Zaehlung ueberhaupt einschliesst.**
 - **Serverseitige PR-Refs ueberleben jeden Rewrite.** `refs/pull/N/head`
   liegt bei GitHub und laesst sich weder umschreiben noch loeschen. Nach
   einem `filter-repo`-Lauf zeigen die lokalen Kopien auf die *neuen*, der
