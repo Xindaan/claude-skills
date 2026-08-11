@@ -13,8 +13,7 @@ description: >
   aufbereiten oder übergeben will. Deckt auch den formalen SDLC-Einstieg ab:
   „Spezifikation aus dem Prototyp", „SDLC-Übergabepaket", „Abnahmetests
   generieren", „was muss neu gebaut werden", „Aufwand schätzen für die
-  Produktivumsetzung". Der Skill ist tool-agnostisch und funktioniert
-  in Claude Code, Claude Cowork, und Claude.ai.
+  Produktivumsetzung".
 ---
 
 # Skill: Prototype/Artifact → Handover Spec Pack

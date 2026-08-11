@@ -65,6 +65,11 @@ Wird der Ableger aus dem privaten Repo REGENERIERT?
 │        deshalb nie, und die alte Klarnamen-Mail bleibt in jedem Folge-Sync
 │        stehen. Nach dem Sync pruefen, nicht annehmen:
 │        `git log --format='%an %ae|%cn %ce' --all | sort -u`
+│        **CHANGELOG ist hier PFLICHT, nicht Kuer.** Ein Snapshot hat genau
+│        einen Commit — die History traegt fuer einen fremden Leser null
+│        Information darueber, was sich je geaendert hat. Der CHANGELOG ist
+│        das einzige Artefakt, das Entwicklung ueberhaupt sichtbar macht.
+│        Gemessen 27.07.2026: drei Ableger, alle 1 Commit, zwei ohne CHANGELOG.
 └─ nein → Der Ableger wird eigenstaendig weiterentwickelt (CI, Issues, PRs).
           Organische History ist dann richtig — aber sie ist UNWIDERRUFLICH:
           alles muss beim ersten Push stimmen. Pflicht: Guard + CHANGELOG.
@@ -316,16 +321,47 @@ Push-Gate strukturell blind ist.
   Fixture-Muster trifft. Drei von fuenf Fundstellen dieses Syncs waren von
   dieser Art.
 
-## Die andere Richtung: Vollstaendigkeit
+## Die andere Richtung: die oeffentliche Doku
 
-Der Skill gatet nur, was zu viel RAUS geht. Die zweite Fehlerklasse ist, dass
-oeffentliche Doku hinter dem privaten Stand zurueckbleibt — kein Leak, aber die
-public README wird schlicht falsch. Realfall 27.07.2026: eine Feature-Aenderung
-(zwei neue Config-Keys) landete in privatem TASK/STATE, aber weder in der public
-README noch in der Beispiel-Config; **kein Gate meldet das**. Beim Sync deshalb:
-neue Zonen-/Config-Keys gegen README **und** `*.example.*` diffen und bei
-Fehlbetrag warnen. Das ist die Klasse, die "gute public README" ueberhaupt zur
-Daueraufgabe macht.
+Alle Gates oben pruefen, ob zu VIEL rausgeht. Die zweite Fehlerklasse ist, dass
+zu WENIG rausgeht: der Ableger ist leak-sauber und trotzdem unbrauchbar, weil
+die Doku den Stand nicht traegt. Kein Gate meldet das je — es ist immer
+Handarbeit beim Sync.
+
+**Der Leser ist ein Fremder.** Er hat deine Hardware nicht, deine Datendateien
+nicht, dein Betriebssystem vielleicht nicht — und er kann nicht nachfragen. Die
+private README darf Kontext voraussetzen, die oeffentliche nie.
+
+1. **Der Quickstart muss auf einer fremden Maschine laufen.** Als woertliche
+   Anweisung lesen, nicht als Erinnerungsstuetze. Realfall 27.07.2026: ein
+   Quickstart endete auf `open <datei>` — macOS-only, bei ausdruecklich
+   internationaler Zielgruppe. Pruefpunkte: plattformspezifische Befehle
+   (`open`, `pbcopy`, Pfadtrenner), private Datendateien, die public gar nicht
+   existieren, vorausgesetzte Env-Variablen ohne `.env.example`-Eintrag.
+2. **Entkoppelte Features muessen benannt sein.** Ein Feature, das public per
+   `find_spec` gar nicht erst registriert wird (§A4), ist fuer den Leser
+   ununterscheidbar von einem Defekt. Ein Satz, was fehlt und warum
+   ("laeuft gegen private Hardware"), verwandelt einen scheinbaren Bug in eine
+   nachvollziehbare Grenze.
+3. **Nutzerbemerkbare Aenderung → README-Abschnitt, nicht nur CHANGELOG-Zeile.**
+   Neue Config-Keys, neue Parameter, geaendertes Verhalten. Mechanisierbar:
+   neue Keys gegen README **und** `*.example.*` diffen, bei Fehlbetrag warnen.
+   Realfall 27.07.2026 zweimal am selben Tag — einmal fehlte die Dosis-Semantik
+   in README und Beispiel-Config komplett, einmal wurde sie korrekt als eigener
+   Abschnitt ergaenzt.
+4. **Ehrlichkeit ist Teil der Qualitaet.** Was das Verfahren NICHT kann,
+   Limitationen, negative Ergebnisse, Datenherkunft und Lizenzen. Ein Backtest,
+   der auch die Verlustfaelle zeigt, ist glaubwuerdig; einer ohne sie ist
+   Werbung.
+5. **Einen guten Text nicht umschreiben.** Ist die README stark, ist die
+   Aenderung das Risiko, nicht der Stillstand. Dann nur den belegten Fehler
+   fixen und das im Bericht sagen — "ich habe sie gelesen und nichts gefunden"
+   ist ein vollwertiges Ergebnis.
+
+Reihenfolge beim Sync: **lesen → Delta bestimmen → gezielt aendern**, nie
+"README neu schreiben, weil Sync". Und die Aenderung gehoert in den
+**Override** unter `tools/public/`, nie in den Ableger — sonst ueberschreibt
+sie der naechste Sync.
 
 ## Wenn doch etwas publiziert wurde
 
