@@ -210,10 +210,9 @@ Kein Beschluss bleibt nur im Chat.
   die anderswo dokumentiert steht, sofort dort nachziehen — Memory-Files,
   Config-Kommentare, Aufgabendatei. Sonst kommt dieselbe Frage in vier Wochen
   wieder.
-- **Outcome-Tracking**, falls es die Entscheidung wert ist: ein
-  Decision-Log-Werkzeug, das Entscheidung, Begruendung, Confidence und spaeteres
-  Ergebnis mit Kalibrierungs-Score erfasst. Nur anbieten, nicht ungefragt
-  befuellen.
+- **Outcome-Tracking**, falls es die Entscheidung wert ist: ein Werkzeug, das
+  Entscheidung, Begruendung, Confidence und spaeteres Ergebnis mit
+  Kalibrierungs-Score festhaelt. Nur anbieten, nicht ungefragt befuellen.
 
 ## Wenn der Nutzer die Vorlage selbst erarbeitet
 
