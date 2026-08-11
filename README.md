@@ -11,7 +11,10 @@ Arbeit entstanden sind und ohne meinen Kontext funktionieren.
 > statement as observed, inferred, or open. `public-mirror` covers building and
 > maintaining a public counterpart of a private work repo — allowlist sync,
 > fail-closed pre-push gate, history strategy, and the leak classes that
-> scanners miss. Output is German by default.
+> scanners miss. `entscheidungsvorlage` shapes a decision so the decider can
+> settle it in one pass — problem, cause, real alternatives (including doing
+> nothing), and a recommendation that names its own downside. Output is German
+> by default.
 
 ## Quickstart
 
@@ -134,6 +137,34 @@ das nichts findet, sieht im Report aus wie ein sauberes Repo.
 
 Der Skill ist bewusst instanzfrei: welche Repo-Paare existieren und was bei
 ihnen offen ist, gehört in eine Datei **beim Repo**, nicht in den Skill.
+
+### `entscheidungsvorlage` — Entscheidungen entscheidungsreif aufbereiten
+
+Bringt eine Entscheidung in eine Form, die der Entscheider **in einem Durchgang**
+treffen kann, ohne rückfragen zu müssen. Jede Rückfrage, die die Vorlage
+auslöst, gilt als ihr Mangel — nicht als Fehler des Lesers.
+
+Die erste Regel ist, **wann keine Vorlage nötig ist**: bei offensichtlichem
+Default, billig umkehrbaren Schritten oder reinen Sachfragen wird selbst
+entschieden und in einem Halbsatz gemeldet. Eine Vorlage, wo keine hingehört,
+schaltet den Mechanismus ab. Die Größenklasse (S inline / M ein Bildschirm /
+L Dokument) richtet sich nach **Umkehrbarkeit × Fehlerkosten**, nicht nach dem
+investierten Analyseaufwand.
+
+Das Schema erzwingt, woran Vorlagen sonst scheitern:
+
+- **Symptom und Ursache getrennt**, Unsicherheit als solche markiert — eine als
+  sicher verkaufte Vermutung verengt den ganzen Optionsraum.
+- **Jede Zahl mit Herkunft:** Fachaussage oder Artefakt der Umsetzung? Eine
+  ungekennzeichnete Artefaktzahl sieht aus wie ein Argument und bindet den Leser
+  an eine Prüfung, die ins Leere geht.
+- **Echte Alternativen auf gleicher Flughöhe**, „nichts tun" immer dabei mit
+  ausgeschriebener Konsequenz — mit Aufwand, Umkehrbarkeit und Preis je Option.
+- **Empfehlung mit ihrem eigenen Nachteil**, dem stärksten Gegenargument in
+  seiner stärksten Form, und dem Satz „was diese Empfehlung kippen würde".
+
+Dazu eine neunteilige Selbstprüfung vor dem Absenden und ein Kopier-Gerüst in
+[`vorlage.md`](skills/entscheidungsvorlage/vorlage.md) für alle drei Klassen.
 
 ## Konfiguration
 
