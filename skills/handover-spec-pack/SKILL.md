@@ -3,17 +3,12 @@ name: handover-spec-pack
 description: >
   Transformiere explorative Artefakte — Code-Repos, Excel-Dateien, JSON, CSV, SQL —
   in ein reviewbares, übergabefähiges Spezifikationspaket für formale Software- oder
-  Einführungsprozesse. Verwende diesen Skill immer wenn der Nutzer ein Prototyp-Artefakt
-  (Repo, Excel, Tabelle, Rapid-Prototype, PoC) analysieren, dokumentieren, spezifizieren
-  oder für eine Übergabe vorbereiten möchte. Auch geeignet bei Anfragen wie
-  „schreib mir eine Spec", „mach ein Handover-Paket", „dokumentiere dieses Repo",
-  „extrahiere die fachliche Logik aus dieser Excel", „was tut dieses Artefakt",
-  „bereite das für die Entwicklung vor", „erstelle User Stories aus dem Prototyp",
-  „Review Pack für Stakeholder", oder wenn der Nutzer ein Artefakt für Dritte
-  aufbereiten oder übergeben will. Deckt auch den formalen SDLC-Einstieg ab:
-  „Spezifikation aus dem Prototyp", „SDLC-Übergabepaket", „Abnahmetests
-  generieren", „was muss neu gebaut werden", „Aufwand schätzen für die
-  Produktivumsetzung".
+  Einführungsprozesse. Verwende diesen Skill, wenn ein Prototyp-Artefakt (Repo,
+  Excel, Tabelle, PoC) analysiert, dokumentiert oder spezifiziert werden soll, wenn
+  fachliche Logik aus einem Artefakt extrahiert werden soll, oder wenn ein Artefakt
+  an Dritte übergeben wird. Deckt auch den formalen SDLC-Einstieg ab: Spezifikation
+  und Abnahmetests aus dem Prototyp, Abgrenzung des Neubaus, Aufwandsschätzung für
+  die Produktivumsetzung.
 ---
 
 # Skill: Prototype/Artifact → Handover Spec Pack

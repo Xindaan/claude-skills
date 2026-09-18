@@ -3,12 +3,11 @@ name: spec-diff
 description: >
   Erstellt einen vollständigen, bijektiven Vergleichsreport zwischen zwei Versionen
   einer technischen Spezifikation (PDF, DOCX, Markdown, HTML, XML/XSD oder Textdateien).
-  Verwende diesen Skill immer wenn der User zwei Versionen eines Dokuments oder einer
-  Spezifikation vergleichen will — egal ob "Vergleich", "Diff", "Delta", "was hat sich
-  geändert", "Änderungsanalyse", "compare versions", "changelog erstellen",
-  "Unterschiede finden", "v6 vs v7", "alt gegen neu", oder ähnliche Formulierungen.
-  Auch geeignet wenn der User ein Änderungsdokument, eine Migrationsübersicht,
-  ein Delta-Dokument oder eine Impact-Analyse zwischen Dokumentversionen erstellen will.
+  Verwende diesen Skill, wenn zwei Versionen eines Dokuments oder einer Spezifikation
+  verglichen werden sollen — unabhängig von der Formulierung (Vergleich, Diff, Delta,
+  Änderungsanalyse, Versionsnummern gegeneinander). Auch geeignet für
+  Änderungsdokumente, Migrationsübersichten und Impact-Analysen zwischen
+  Dokumentversionen.
   Funktioniert mit einzelnen Dateien ebenso wie mit ganzen Dokumentfamilien
   (z.B. mehrteilige TRs, Normen, Standards mit Schema-Paketen).
 ---
