@@ -1,6 +1,6 @@
 ---
 name: entscheidungsvorlage
-description: 'Bereitet eine Entscheidung so auf, dass die zustaendige Person sie treffen kann — Problem, Ursache, Folgen, Entscheidungssatz mit Frist, echte Handlungsalternativen inklusive Nichtstun, Empfehlung mit Preis. Verwende diesen Skill in zwei Faellen. (1) Der Nutzer fordert es an: "mach mir eine Entscheidungsvorlage", "leg mir das zur Entscheidung vor", "bereite das als Vorlage auf", "welche Optionen habe ich", "was soll ich tun", "stell mir das gegenueber", "Vorlage fuer die Leitung", "das muss ich entscheiden". (2) Ungefragt, sobald ich selbst waehrend der Arbeit an einen Punkt komme, an dem eine Entscheidung des Nutzers noetig ist und mehrere Wege ernsthaft plausibel sind — dann liefere ich das Ergebnis in dieser Form statt als Fliesstext-Rueckfrage. Nicht verwenden, wenn ein Default offensichtlich ist (dann selbst entscheiden und melden) oder wenn nur eine Sachfrage beantwortet werden soll.'
+description: 'Bereitet eine Entscheidung so auf, dass die zustaendige Person sie treffen kann — Problem, Ursache, Folgen, Entscheidungssatz mit Frist, echte Handlungsalternativen inklusive Nichtstun, Empfehlung mit Preis. Verwende diesen Skill in drei Faellen. (1) Der Nutzer fordert es an: "mach mir eine Entscheidungsvorlage", "leg mir das zur Entscheidung vor", "bereite das als Vorlage auf", "welche Optionen habe ich", "was soll ich tun", "stell mir das gegenueber", "Vorlage fuer die Leitung", "das muss ich entscheiden". (2) Ungefragt, sobald ich selbst waehrend der Arbeit an einen Punkt komme, an dem eine Entscheidung des Nutzers noetig ist und mehrere Wege ernsthaft plausibel sind — dann liefere ich das Ergebnis in dieser Form statt als Fliesstext-Rueckfrage. (3) Entscheidungs-Scan: "welche Entscheidungen stehen an", "was brennt", "scan das auf offene Entscheidungen". Nicht verwenden, wenn ein Default offensichtlich ist (dann selbst entscheiden und melden) oder wenn nur eine Sachfrage beantwortet werden soll.'
 ---
 
 # Entscheidungsvorlage
@@ -40,6 +40,30 @@ wenn:
   Risikoappetit, Aussenwirkung),
 - ich merke, dass ich gerade eine Praemisse *setzen* wuerde, statt einer zu
   folgen.
+
+## Modus Entscheidungs-Scan
+
+Statt eine vorgegebene Frage aufzubereiten, finde ich die Entscheidungen
+selbst. Das ist die hoehere Ebene: der Nutzer soll nicht erst merken muessen, dass
+etwas zu entscheiden ist.
+
+1. **Material lesen** und jede Stelle sammeln, an der etwas nicht weitergeht,
+   ohne dass jemand entscheidet: offene Optionen, wiederkehrende Eskalationen,
+   Termine, die an einer Freigabe haengen, Widersprueche zwischen Quellen.
+2. **Pro Kandidat ein Entscheidungssatz** (Ja/Nein/A, wie in Schritt 0), dazu
+   der Bedarfstraeger und die Frist, sofern belegbar. Was keinen Entscheidungssatz
+   ergibt, ist keine Entscheidung, sondern eine Aufgabe oder Information:
+   aussortieren.
+3. **Priorisieren nach Dringlichkeit x Tragweite**: welche Tuer faellt zuerst zu
+   (Schritt 5), was kostet eine Fehlentscheidung (Groessenklasse). Belege je
+   Kandidat mit Fundstelle.
+4. **Ausgabe:** eine Liste der hoechstens fuenf dringendsten Entscheidungen, je
+   eine Zeile Entscheidungssatz, Frist, Groessenklasse, Fundstelle, plus je ein
+   Satz dafuer und dagegen. Danach den Nutzer waehlen lassen, welche als volle
+   Vorlage ausgearbeitet wird; Klasse S darf ich direkt mitliefern.
+5. **Nicht selbst entscheiden**, was fachlich Entscheidung des Nutzers ist, auch wenn
+   die Liste eine Empfehlung nahelegt. Ist ein Default offensichtlich, steht er
+   als Empfehlung da, nicht als erledigt.
 
 ## Groessenklasse waehlen
 
